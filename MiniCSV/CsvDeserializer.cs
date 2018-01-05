@@ -18,11 +18,9 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
-using System;
-
-public class CsvFormatException : Exception
+namespace MiniCSV
 {
-  public CsvFormatException() { }
-  public CsvFormatException(string message) : base(message) { }
-  public CsvFormatException(string message, Exception inner) : base(message, inner) { }
+    class CsvDeserializer
+    {
+    }
 }
