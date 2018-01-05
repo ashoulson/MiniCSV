@@ -1,0 +1,6 @@
+MiniCSV/bin
+MiniCSV/obj
+MiniCSV.Tests/bin
+MiniCSV.Tests/obj
+TestResults
+.vs/
