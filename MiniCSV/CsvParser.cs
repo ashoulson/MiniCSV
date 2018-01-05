@@ -1,4 +1,24 @@
-﻿using System.Collections.Generic;
+﻿/*
+ *  MiniCSV - A Simple C# CSV Parser and Object Deserializer
+ *  Copyright (c) 2018 - Alexander Shoulson - http://ashoulson.com
+ *
+ *  This software is provided 'as-is', without any express or implied
+ *  warranty. In no event will the authors be held liable for any damages
+ *  arising from the use of this software.
+ *  Permission is granted to anyone to use this software for any purpose,
+ *  including commercial applications, and to alter it and redistribute it
+ *  freely, subject to the following restrictions:
+ *  
+ *  1. The origin of this software must not be misrepresented; you must not
+ *     claim that you wrote the original software. If you use this software
+ *     in a product, an acknowledgment in the product documentation would be
+ *     appreciated but is not required.
+ *  2. Altered source versions must be plainly marked as such, and must not be
+ *     misrepresented as being the original software.
+ *  3. This notice may not be removed or altered from any source distribution.
+*/
+
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -6,6 +26,9 @@ namespace MiniCSV
 {
   public class CsvParser
   {
+    private readonly TextReader reader;
+    private readonly StringBuilder builder;
+    
     // The separator/delimeter character
     private char separator;
     // The quote/block container character
@@ -19,9 +42,6 @@ namespace MiniCSV
     private bool inBlock;
     // We've seen a potential block end but need to verify
     private bool isBlockEnding;
-
-    private readonly TextReader reader;
-    private readonly StringBuilder builder;
 
     public CsvParser(
       TextReader reader, 
@@ -42,8 +62,9 @@ namespace MiniCSV
     {
       this.Reset();
       result = null;
+      bool complete = false;
 
-      while (reader.Peek() != -1)
+      while ((complete == false) && (reader.Peek() != -1))
       {
         if (result == null)
           result = new List<string>();
@@ -56,7 +77,7 @@ namespace MiniCSV
         if (current == this.quote)
           this.ReadQuote(result);
         else if (this.ReadOther(result, current))
-          break;
+          complete = true;
       }
 
       if (this.inBlock)
@@ -65,6 +86,10 @@ namespace MiniCSV
       // Consume whatever is left over, if anything
       if (this.builder.Length > 0)
         this.Record(result);
+      // Special case for EOF with no newline
+      else if ((result != null) && (complete == false) && (reader.Peek() == -1))
+        this.Record(result);
+
       this.rowCount++;
       return (result != null);
     }
@@ -125,6 +150,7 @@ namespace MiniCSV
         }
       }
 
+      // Read special characters
       if (current == '\n')
       {
         this.Record(result);
