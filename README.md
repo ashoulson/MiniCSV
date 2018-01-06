@@ -2,9 +2,9 @@
 
 Alexander Shoulson, Ph.D. - http://ashoulson.com
 
----
+[![Build status](https://ci.appveyor.com/api/projects/status/9grxt3il660lnscc?svg=true)](https://ci.appveyor.com/project/ashoulson/minicsv)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/1dt5aepocun584g4/branch/master?svg=true)](https://ci.appveyor.com/project/ashoulson/miniudp/branch/master)
+---
 
 A simple library to deserialize CSV files into corresponding C# classes. Expects CSV files to conform to [RFC4180](https://tools.ietf.org/html/rfc4180) (tested against Excel and Google Sheets exported CSV files).
 
@@ -48,10 +48,10 @@ Then create both a parser and deserializer to parse and produce objects.
 
 ```
   List<TestData> results = new List<TestData>();
-  using (StreamReader sr = File.OpenText(path))
+  using (StreamReader reader = File.OpenText(path))
   {
     CsvDeserializer<TestData> deserializer =
-      new CsvDeserializer<TestData>(new CsvParser(sr), false, false);
+      new CsvDeserializer<TestData>(new CsvParser(reader));
     while (deserializer.TryProduce(out TestData output))
       results.Add(output);
   }
