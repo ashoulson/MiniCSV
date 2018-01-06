@@ -61,7 +61,7 @@ namespace MiniCSV.Tests
   public class TestDeserializer
   {
     [TestMethod]
-    // Make sure we're getting the correct number of rows and columns
+    // Test deserialization on a normal file with a header
     public void TestDeserialize()
     {
       string path = TestCommon.GetPath("testcsv_deserialize.csv");
@@ -71,6 +71,39 @@ namespace MiniCSV.Tests
       {
         CsvDeserializer<TestData> deserializer = 
           new CsvDeserializer<TestData>(new CsvParser(sr));
+        while (deserializer.TryProduce(out TestData output))
+          results.Add(output);
+      }
+
+      Assert.IsTrue(results.Count == 3);
+
+      Assert.IsTrue(results[0].Name == "Alice");
+      Assert.IsTrue(results[0].Age == 32);
+      Assert.IsTrue(results[0].Percent == 96.4f);
+      Assert.IsTrue(results[0].FavoriteColor == Color.Blue);
+
+      Assert.IsTrue(results[1].Name == "Bob");
+      Assert.IsTrue(results[1].Age == 25);
+      Assert.IsTrue(results[1].Percent == 87.3f);
+      Assert.IsTrue(results[1].FavoriteColor == Color.Red);
+
+      Assert.IsTrue(results[2].Name == "Charlie");
+      Assert.IsTrue(results[2].Age == 33);
+      Assert.IsTrue(results[2].Percent == 50.2f);
+      Assert.IsTrue(results[2].FavoriteColor == Color.Green);
+    }
+
+    [TestMethod]
+    // Test deserialization on a file with no header (and no validation)
+    public void TestDeserializeNoHeader()
+    {
+      string path = TestCommon.GetPath("testcsv_deserialize_noHeader.csv");
+
+      List<TestData> results = new List<TestData>();
+      using (StreamReader sr = File.OpenText(path))
+      {
+        CsvDeserializer<TestData> deserializer =
+          new CsvDeserializer<TestData>(new CsvParser(sr), false, false);
         while (deserializer.TryProduce(out TestData output))
           results.Add(output);
       }

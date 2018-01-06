@@ -1,4 +1,4 @@
-﻿name,age,percent,favoriteColor,
+﻿Name,Age,Percent,Favorite Color,
 Alice,32,96.4,Blue,
-Bob,25,87.3,Red,// Comment
+Bob,25,87.3,Red,(Any values after the parameter data columns are ignored)
 Charlie,33,50.2,Green,

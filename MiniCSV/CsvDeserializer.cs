@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace MiniCSV
@@ -31,13 +32,18 @@ namespace MiniCSV
     private readonly ConstructorInfo constructor;
     private readonly ParameterInfo[] parameters;
 
-    public CsvDeserializer(CsvParser parser)
+    public CsvDeserializer(
+      CsvParser parser, 
+      bool hasHeader = true, 
+      bool validateHeader = true)
     {
       this.parser = parser ?? throw new ArgumentNullException("parser");
 
       this.constructor = this.FindConstructor();
       this.parameters = this.constructor.GetParameters();
-      this.Validate();
+
+      if (hasHeader)
+        this.ReadHeader(validateHeader);
     }
 
     /// <summary>
@@ -87,9 +93,11 @@ namespace MiniCSV
       return (result != null);
     }
 
-    private void Validate()
+    private void ReadHeader(bool validateHeader)
     {
       IList<string> header = this.parser.ReadRow();
+      if (validateHeader == false)
+        return;
 
       // Validate that we have a proper header
       if (header == null)
@@ -105,10 +113,15 @@ namespace MiniCSV
 
       // Validate names (case-insensitive)
       for (int i = 0; i < this.parameters.Length; i++)
-        if (header[i].ToLower() != this.parameters[i].Name.ToLower())
+      {
+        string dataName = Regex.Replace(header[i].ToLower(), @"(\s|_)+", "");
+        string paramName = Regex.Replace(this.parameters[i].Name.ToLower(), @"(\s|_)+", "");
+
+        if (dataName != paramName)
           throw new CsvDeserializeException(
             "Csv header does not match constructor parameter names for: " +
             typeof(TObject).ToString());
+      }
     }
 
     /// <summary>

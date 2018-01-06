@@ -35,7 +35,7 @@ namespace MiniCSV.Tests
       const int ROWS = 5;
       const int COLUMNS = 4;
 
-      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_parse.csv");
       Assert.IsTrue(values1.Count == ROWS);
 
       for (int i = 0; i < ROWS; i++)
@@ -47,8 +47,8 @@ namespace MiniCSV.Tests
     // without a new line at the end of the file (though there should be one)
     public void TestNoNewline()
     {
-      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
-      List<IList<string>> values2 = TestCommon.ReadFile("testcsv_noNewline.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_parse.csv");
+      List<IList<string>> values2 = TestCommon.ReadFile("testcsv_parse_noNewline.csv");
 
       Assert.IsTrue(values1.Count == values2.Count);
       for (int i = 0; i < values1.Count; i++)
@@ -63,7 +63,7 @@ namespace MiniCSV.Tests
     // Explicitly tests the values of the base CSV test file against expected
     public void TestValuesExplicitly()
     {
-      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_parse.csv");
 
       Assert.IsTrue(values1[0][0] == "one");
       Assert.IsTrue(values1[0][1] == "2");
