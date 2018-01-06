@@ -18,9 +18,125 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+
 namespace MiniCSV
 {
-    class CsvDeserializer
+  public class CsvDeserializer<TObject>
+    where TObject : class
+  {
+    private readonly CsvParser parser;
+    private readonly ConstructorInfo constructor;
+    private readonly ParameterInfo[] parameters;
+
+    public CsvDeserializer(CsvParser parser)
     {
+      this.parser = parser ?? throw new ArgumentNullException("parser");
+
+      this.constructor = this.FindConstructor();
+      this.parameters = this.constructor.GetParameters();
+      this.Validate();
     }
+
+    /// <summary>
+    /// Produces a C# object from the next row in the CSV file.
+    /// </summary>
+    public TObject Produce()
+    {
+      IList<string> entries = this.parser.ReadRow();
+      if (entries == null)
+        return null;
+
+      if (entries.Count < this.parameters.Length)
+        throw new CsvDeserializeException(
+          "Csv has fewer rows than required to deserialize: " +
+          typeof(TObject).ToString());
+
+      object[] values = new object[this.parameters.Length];
+      for (int i = 0; i < this.parameters.Length; i++)
+      {
+        ParameterInfo paramInfo = this.parameters[i];
+
+        try
+        {
+          if (paramInfo.ParameterType.IsEnum)
+            values[i] = Enum.Parse(paramInfo.ParameterType, entries[i]);
+          else
+            values[i] = Convert.ChangeType(entries[i], paramInfo.ParameterType);
+        }
+        catch (Exception inner)
+        {
+          throw new CsvDeserializeException(
+            "Parsing failed for object " + typeof(TObject) +
+            " on row " + parser.CurrentRow, 
+            inner);
+        }
+      }
+
+      return (TObject)this.constructor.Invoke(values);
+    }
+
+    /// <summary>
+    /// Tries to produce an object, returns true iff successful.
+    /// </summary>
+    public bool TryProduce(out TObject result)
+    {
+      result = this.Produce();
+      return (result != null);
+    }
+
+    private void Validate()
+    {
+      IList<string> header = this.parser.ReadRow();
+
+      // Validate that we have a proper header
+      if (header == null)
+        throw new CsvDeserializeException(
+          "Csv has no header data for: " +
+          typeof(TObject).ToString());
+
+      // Validate parameter count (CSV can have extra columns)
+      if (header.Count < this.parameters.Length)
+        throw new CsvDeserializeException(
+          "Csv has fewer parameters in header than required for: " +
+          typeof(TObject).ToString());
+
+      // Validate names (case-insensitive)
+      for (int i = 0; i < this.parameters.Length; i++)
+        if (header[i].ToLower() != this.parameters[i].Name.ToLower())
+          throw new CsvDeserializeException(
+            "Csv header does not match constructor parameter names for: " +
+            typeof(TObject).ToString());
+    }
+
+    /// <summary>
+    /// Finds the constructor on our object type that has a CsvConstructor
+    /// attribute. We expect to find exactly one such constructor.
+    /// </summary>
+    private ConstructorInfo FindConstructor()
+    {
+      ConstructorInfo[] constructors = typeof(TObject).GetConstructors();
+      ConstructorInfo found = null;
+
+      for (int i = 0; i < constructors.Length; i++)
+      {
+        if (constructors[i].GetCustomAttribute<CsvConstructorAttribute>() != null)
+        {
+          if (found != null)
+            throw new CsvDeserializeException(
+              "Type has multiple CsvConstructor attributes: " + 
+              typeof(TObject).ToString());
+          found = constructors[i];
+        }
+      }
+
+      if (found == null)
+        throw new CsvDeserializeException(
+          "Type has no valid constructor with a CsvConstructor attribute: " +
+          typeof(TObject).ToString());
+      return found;
+    }
+  }
 }

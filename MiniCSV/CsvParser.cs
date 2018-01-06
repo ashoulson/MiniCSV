@@ -26,6 +26,8 @@ namespace MiniCSV
 {
   public class CsvParser
   {
+    public int CurrentRow { get { return this.rowCount; } }
+
     private readonly TextReader reader;
     private readonly StringBuilder builder;
     
@@ -58,10 +60,14 @@ namespace MiniCSV
       this.Reset();
     }
 
-    public bool TryReadRow(out IList<string> result)
+    /// <summary>
+    /// Reads the next row in the CSV file and returns it as a list of strings.
+    /// </summary>
+    public IList<string> ReadRow()
     {
       this.Reset();
-      result = null;
+
+      IList<string> result = null;
       bool complete = false;
 
       while ((complete == false) && (reader.Peek() != -1))
@@ -91,6 +97,15 @@ namespace MiniCSV
         this.Record(result);
 
       this.rowCount++;
+      return result;
+    }
+
+    /// <summary>
+    /// Tries to read a row, returns true iff successful.
+    /// </summary>
+    public bool TryReadRow(out IList<string> result)
+    {
+      result = this.ReadRow();
       return (result != null);
     }
 

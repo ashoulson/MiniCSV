@@ -18,10 +18,29 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
-using System;
+using System.Collections.Generic;
+using System.IO;
 
-namespace MiniCSV
+namespace MiniCSV.Tests
 {
-  [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
-  public class CsvConstructorAttribute : Attribute { }
+  public class TestCommon
+  {
+    public static string GetPath(string fileName)
+    {
+      return Path.Combine(Directory.GetCurrentDirectory(), "Csv", fileName);
+    }
+
+    public static List<IList<string>> ReadFile(string fileName)
+    {
+      List<IList<string>> values = new List<IList<string>>();
+      using (StreamReader sr = File.OpenText(TestCommon.GetPath(fileName)))
+      {
+        CsvParser parser = new CsvParser(sr);
+        while (parser.TryReadRow(out IList<string> result))
+          values.Add(result);
+      }
+
+      return values;
+    }
+  }
 }

@@ -23,9 +23,7 @@ using System.IO;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MiniCSV;
-
-namespace Tests
+namespace MiniCSV.Tests
 {
   [TestClass]
   public class TestParser
@@ -37,7 +35,7 @@ namespace Tests
       const int ROWS = 5;
       const int COLUMNS = 4;
 
-      List<IList<string>> values1 = ReadFile("testcsv_base.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
       Assert.IsTrue(values1.Count == ROWS);
 
       for (int i = 0; i < ROWS; i++)
@@ -49,8 +47,8 @@ namespace Tests
     // without a new line at the end of the file (though there should be one)
     public void TestNoNewline()
     {
-      List<IList<string>> values1 = ReadFile("testcsv_base.csv");
-      List<IList<string>> values2 = ReadFile("testcsv_noNewline.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
+      List<IList<string>> values2 = TestCommon.ReadFile("testcsv_noNewline.csv");
 
       Assert.IsTrue(values1.Count == values2.Count);
       for (int i = 0; i < values1.Count; i++)
@@ -65,7 +63,7 @@ namespace Tests
     // Explicitly tests the values of the base CSV test file against expected
     public void TestValuesExplicitly()
     {
-      List<IList<string>> values1 = ReadFile("testcsv_base.csv");
+      List<IList<string>> values1 = TestCommon.ReadFile("testcsv_base.csv");
 
       Assert.IsTrue(values1[0][0] == "one");
       Assert.IsTrue(values1[0][1] == "2");
@@ -91,22 +89,6 @@ namespace Tests
       Assert.IsTrue(values1[4][1] == "two \"three\", four");
       Assert.IsTrue(values1[4][2] == "five");
       Assert.IsTrue(values1[4][3] == "");
-    }
-
-    private List<IList<string>> ReadFile(string fileName)
-    {
-      string filePath = 
-        Path.Combine(Directory.GetCurrentDirectory(), fileName);
-
-      List<IList<string>> values = new List<IList<string>>();
-      using (StreamReader sr = File.OpenText(filePath))
-      {
-        CsvParser parser = new CsvParser(sr);
-        while (parser.TryReadRow(out IList<string> result))
-          values.Add(result);
-      }
-
-      return values;
     }
   }
 }

@@ -20,8 +20,9 @@
 
 using System;
 
-namespace MiniCSV
+public class CsvDeserializeException : Exception
 {
-  [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
-  public class CsvConstructorAttribute : Attribute { }
+  public CsvDeserializeException() { }
+  public CsvDeserializeException(string message) : base(message) { }
+  public CsvDeserializeException(string message, Exception inner) : base(message, inner) { }
 }

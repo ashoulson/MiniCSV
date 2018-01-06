@@ -17,10 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="testcsv_noNewline.csv">
+    <None Update="Csv\testcsv_deserialize.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="testcsv_base.csv">
+    <None Update="Csv\testcsv_noNewline.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Csv\testcsv_base.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
